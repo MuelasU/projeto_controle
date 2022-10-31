@@ -1,3 +1,9 @@
+---
+header-includes:
+    - \usepackage{graphicx}
+    - \graphicspath{ {./images/} }
+...
+
 # Projeto Controle de um Levitador Magnético
 
 ### ES710 - Controle de sistemas mecânicos
@@ -10,9 +16,9 @@
 
 Neste projeto analisamos o sistema de um levitador magnético. O sistema consiste de uma bola de material magnético com massa $m$ suspensa por um eletroímã, cuja corrente é controlada via realimentação, utilizando a medida da posição da bola $y$, que por sua vez é obtida por um sensor óptico. A posição vertical $y \ge 0$ é medida a partir de um ponto de referencia em que $y = 0$ quando a bola está encostada no eletroímã. Nesta figura, $\kappa$ é o coeficiente de atrito viscoso, $g$ é a aceleração da gravidade, $F(y,i)$ é a força gerada pelo eletroímã e $i$ é a corrente elétrica associada.
 
-<p align="center">
-    <img width=300 src="images/sistema.png">
-</p>
+\begin{center}
+    \includegraphics[scale=0.5]{sistema}
+\end{center}
 
 A indutância do eletroímã pode ser modelada por
 $$L(y) = L_1 + \frac{L_0}{1+y/a}$$
@@ -30,10 +36,9 @@ A análise do sistema começa pela modelagem do sistema, que foi dividido em sis
 
 - Sistema Elétrico
 
-<p align="center">
-    <img width=200 src="images/circuit.png">
-</p>
- 
+\begin{center}
+    \includegraphics[scale=0.5]{circuit}
+\end{center}
 
 $$v = Ri + \dot\phi$$
 $$v = Ri + (L(y)'\cdot i + L(y)\cdot i')$$
@@ -42,9 +47,9 @@ $$v = \left[ R - aL_0\frac{y'}{(a+y)^2} \right]i + \left[ L_1 + \frac{aL_0}{a+y}
 
 - Sistema Dinâmico
 
-<p align="center">
-    <img height=200 src="images/ball.png">
-</p>
+\begin{center}
+    \includegraphics[scale=0.5]{ball}
+\end{center}
 
 $$my'' = F(y, i) + mg - \kappa y'$$
 $$my'' + \frac{L_0i^2}{2a(1+y/a)^2} - mg + \kappa y' = 0$$
