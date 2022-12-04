@@ -127,9 +127,9 @@ $$\begin{bmatrix} \dot{x_1}
 \frac{L_0 i_e^2}{ma^2} & -\frac{k}{m} & -\frac{L_o i_e}{ma}\\ 
 0 & \frac{L_0}{L_0+L_1}\frac{i_e}{a} & -\frac{R}{L_0+L_1}
 \end{bmatrix}
-\begin{bmatrix} \dot{x_1}
-\\ \dot{x_2}
-\\ \dot{x_3}
+\begin{bmatrix} x_1
+\\ x_2
+\\ x_3
 \end{bmatrix}
 +
 \begin{bmatrix} 0
@@ -143,9 +143,9 @@ z=
 \begin{bmatrix}
     1 & 0 & 0
 \end{bmatrix}
-\begin{bmatrix} \dot{x_1}
-\\ \dot{x_2}
-\\ \dot{x_3}
+\begin{bmatrix} x_1
+\\ x_2
+\\ x_3
 \end{bmatrix}
 + [0]u
 $$
