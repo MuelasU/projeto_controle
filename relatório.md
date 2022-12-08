@@ -177,3 +177,118 @@ Com o auxílio do computador, obtemos a função de transferência:
 $$
 G(s) =-\frac{- L_{0}^{2} a i_{e} - L_{0} L_{1} a i_{e}}{\left(L_{0} + L_{1}\right) \left(- L_{0} L_{1} i_{e}^{2} s - L_{0} R i_{e}^{2} + L_{0} a^{2} k s^{2} + L_{0} a^{2} m s^{3} + L_{1} a^{2} k s^{2} + L_{1} a^{2} m s^{3} + R a^{2} k s + R a^{2} m s^{2}\right)}
 $$
+
+Para os valores numéricos do item anterior, temos:
+$$
+G(s) = \frac{126.6}{s^3+100s^2-108.1s-3924\cdot10^4}
+$$
+
+
+## Projeto de Controle a Tempo Contínuo
+
+### Projeto do controlador
+
+\begin{center}
+    \includegraphics[scale=0.5]{malha-fechada}
+\end{center}
+
+Com base na estrutura de controle em malha fechada da figura acima, foi feito o projeto do controlador $C(s)$ de forma a estabilizar a planta $G(s)$. O controlador deve atender requisitos de projetos que são discutidos a seguir.
+
+- Erro nulo para entrada degrau
+
+    Analisando a planta $G(s)$ notamos que ela não possui polos na origem, logo ela é dita do tipo 0. Para que o sistema em malha fechada possua erro nulo para entrada degrau ele precisa ser do tipo 1, portanto o controlador $C(s)$ deve ter pelo menos um polo na origem.
+
+- Tempo de estabilização menor que 4 segundos
+
+    O tempo de estabilização define um limitante de quão próximo os polos dominantes do sistema em malha fechada devem estar do eixo imaginário. Consideramos $\epsilon_t = 2\%$:
+
+$$t_e = \frac{-ln(\epsilon_t)}{\xi \omega_n} < 4s $$
+$$\frac{-ln(0.02)}{\xi\omega_n} < 4s$$
+$$\xi\omega_n > 1$$
+
+- Margem de fase MF > 30º
+  
+    Pela aproximação $MF \approx 100\xi$ temos que $\xi>0.3$
+
+- Valor de pico da posição $\text{max}_{t\ge0} y(t) \le 0.04$ para entrada degrau de amplitude $0.02$
+  
+$$\text{max} \;\; y(t) = 0.02 + e^{\frac{-\xi\pi}{\sqrt{1-\xi^2}}} \le 0.04$$
+$$\xi \ge 0.778$$
+
+- Esforço de controle $|u| \le 200V$ para entrada degrau de amplitude $0.02$
+
+    Este critério será analisado *a posteriori* para ver se o controlador não gasta muito para estabilizar a planta. Com base na figura do sistema em malha fechada temos
+$$\frac{\hat{u}(s)}{\hat{r}(s)} = \frac{C(s)}{1+C(s)G(s)}$$
+
+Com este parâmetros definidos, utilizamos o método do lugar das raízes para projetar o controlador:
+
+- Inicialmente, analisamos o lugar das raízes de $G(s)$ e notamos que ele é sempre instável.
+\begin{center}
+    \includegraphics[scale=0.5]{rootsGs}
+\end{center}
+- Depois, aplicamos um controlador integrador com polo na origem para atender o requisito de erro nulo para entrada degrau e notamos que seus polos dominantes determinarão sempre um sistema instável.
+\begin{center}
+    \includegraphics[scale=0.5]{rootsGss}
+\end{center}
+- Com isso, adicionamos dois zeros em $s=-8$ para que seja possível ter os polos dominantes no semiplano esquerdo. Determinamos a região $\Omega$ com os requisitos dados.
+\begin{center}
+    \includegraphics[scale=0.5]{regiao}
+\end{center}
+- Para que o controlador fosse implementável, adicionamos um polo $(\tau s+1)$ com $\tau = 0.008$ suficientemente pequeno.
+- Com a ferramenta `sisotool` do MATLAB determinamos o ganho $\kappa = 78$ que alocasse os polos dominantes do sistema em malha fechada na região $\Omega$ e que cumprisse todos requisitos.
+
+Deste modo, o controlador resultante do projeto é
+
+$$C(s) = 78\frac{(s+8)^2}{s(0.008s+1)}$$
+
+A seguir está a resposta do sistema em malha fechada ao degrau de amplitude $0.02$. Note que todos requisitos foram atendidos.
+
+\begin{center}
+    \includegraphics[scale=0.8]{resposta}
+    \includegraphics[scale=0.8]{esforço}
+\end{center}
+
+### Análise do controlador no sistema não-linear
+
+Com o controlador $C(s)$ determinado anteriormente, tentamos aplicá-lo no sistema não-linear do levitador magnético no intuito de analisar os efeitos da linearização e a eficiência deste método.
+
+Com auxílio do Simulink, montamos o sistema dado pelas equações de estado do modelo não linear e conectamos $C(s)$ na entrada de controle, implementamos o *feedback* da malha fechada e inserimos uma entrada degrau de mesma amplitude $0.02$.
+
+\begin{center}
+    \includegraphics[scale=0.4]{simulink}
+\end{center}
+
+A simulação, no entanto, não deu certo, com a resposta $y(t)$ tendendo para o infinito. Este resultado se deve provavelmente a algum erro no processo de linearização que não foi visto.
+
+## Projeto de Controle a Tempo Contínuo
+
+### Equivalente discreto
+
+Com base no controlador projetado a tempo contínuo, determinamos seus equivalentes discretos com período de amostragem $T = 0.001s$ por meio de diferentes métodos utilizando o comando `c2d` do MATLAB:
+
+- Segurador de Orgem Zero
+$$C_S(z)=\frac{9750z^2-19350z+9604}{z^2-1.882z+0.8825}$$
+- Tustin
+$$C_T(z)=\frac{9750z^2-18350z+9103}{z^2-1.882z+0.8824}$$
+- Mapeamento de Polos e Zeros
+$$C_M(z)=\frac{9239z^2-18330z+9092}{z^2-1.882z+0.8825}$$
+
+A partir destes resultados, aplicamos os controladores discretizados no sistema em malha fechada e observamos a resposta ao degrau de amplitude $0.01$ e o esforço de controle de cada um.
+
+\begin{center}
+    \includegraphics[scale=0.35]{resposta-discreto}
+    \includegraphics[scale=0.35]{esforço-discreto}
+\end{center}
+
+Analisando os gráficos, não é possível notar muita diferença entre os controladores, principalmente entre o segurador de ordem zero e o Tustin.
+
+### Projeto direto
+
+Primeiramente, discretizamos a planta pelo método segurador de ordem zero com $T = 0.01s$, o que resultou em 
+$$G(z) = \frac{1.673\cdot10^{-5}z^2+5.137\cdot10^{-5}z+1.016\cdot10^{-5}}{z^3-2.389z^2-1.732z-0.3677}$$
+Com isso, utilizamos a ferramenta `sisotool` para projetar o controldor $C(z)$. A figura a seguir mostra o lugar das raízes do sistema em malha fechada já com o controlador implementado e a região de projeto com requisitos de $t_e < 4s$ e $\xi > 0.8$. O controlador projetado que estabiliza o sistema e atende os requisitos citados é do tipo derivativo e possui um zero em $z=0.74$. O ajuste do ganho foi feito e resultou no controlador
+$$C(z) = 1279(z-0.74)$$
+
+\begin{center}
+    \includegraphics[scale=0.4]{root-discrete}
+\end{center}
